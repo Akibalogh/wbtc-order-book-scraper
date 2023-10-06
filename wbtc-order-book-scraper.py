@@ -1,3 +1,4 @@
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -33,24 +34,27 @@ wait = WebDriverWait(driver, 10)
 
 csv_file = open('scraped_data.csv', 'w', newline='')
 csv_writer = csv.writer(csv_file)
-csv_writer.writerow(['Date & Time', 'Merchant', 'Amount'])  
 csv_writer.writerow(['Date & Time', 'Merchant', 'Amount', 'Action'])  # Header
-
 
 # Wait for the first page to load
 time.sleep(2)
 
 
-# Testing feature: Set this to True to only grab data from the first page for testing
+# Testing feature: Set this to True to only grab data from the first two pages for testing
 testing_mode = True
+
+# Counter for pages processed
+page_count = 0
 
 while True:
     # Extract data from the current page
     page_source = driver.page_source
     extract_data(page_source, csv_writer)
     
-    if testing_mode:
-        break  # Exit loop if in testing mode
+    page_count += 1  # Increment the page counter
+    
+    if testing_mode and page_count >= 2:
+        break  # Exit loop if in testing mode and two pages have been processed
 
     # Extract data from the current page
     page_source = driver.page_source
@@ -71,17 +75,3 @@ while True:
 # Close the browser and CSV file
 driver.quit()
 csv_file.close()
-
-import pandas as pd
-
-# Load the scraped data
-df = pd.read_csv('scraped_data.csv', skiprows=1)
-
-# Remove the time component from 'Date & Time' and convert the date to Excel-compatible format (YYYY-MM-DD)
-df['Date'] = pd.to_datetime(df['Date & Time'], format='%b %d %Y - %H:%M').dt.strftime('%Y-%m-%d')
-
-# Drop the original 'Date & Time' column
-df.drop('Date & Time', axis=1, inplace=True)
-
-# Save the cleaned DataFrame to a new CSV file
-df.to_csv('scraped_data_cleaned.csv', index=False)
