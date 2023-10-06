@@ -64,7 +64,7 @@ csv_file.close()
 import pandas as pd
 
 # Load the scraped data
-df = pd.read_csv('scraped_data.csv')
+df = pd.read_csv('scraped_data.csv', skiprows=1)
 
 # Remove the time component from 'Date & Time' and convert the date to Excel-compatible format (YYYY-MM-DD)
 df['Date'] = pd.to_datetime(df['Date & Time'], format='%b %d %Y - %H:%M').dt.strftime('%Y-%m-%d')
