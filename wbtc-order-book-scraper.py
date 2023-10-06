@@ -50,3 +50,17 @@ while True:
 # Close the browser and CSV file
 driver.quit()
 csv_file.close()
+
+import pandas as pd
+
+# Load the scraped data
+df = pd.read_csv('scraped_data.csv')
+
+# Remove the time component from 'Date & Time' and convert the date to Excel-compatible format (YYYY-MM-DD)
+df['Date'] = pd.to_datetime(df['Date & Time'], format='%b %d %Y - %H:%M').dt.strftime('%Y-%m-%d')
+
+# Drop the original 'Date & Time' column
+df.drop('Date & Time', axis=1, inplace=True)
+
+# Save the cleaned DataFrame to a new CSV file
+df.to_csv('scraped_data_cleaned.csv', index=False)
