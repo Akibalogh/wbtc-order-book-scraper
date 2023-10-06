@@ -12,7 +12,12 @@ def extract_data(page_source, csv_writer):
     rows = soup.find_all('mat-row', {'class': 'master-row'})
     
     for row in rows:
-        date_time = row.find('mat-cell', {'class': 'cdk-column-timestamp'}).text.strip()
+        # Convert 'Date & Time' to just 'Date' in the 'YYYY-MM-DD' format
+from datetime import datetime
+date_time_str = row.find('mat-cell', {'class': 'cdk-column-timestamp'}).text.strip()
+date_time_obj = datetime.strptime(date_time_str, '%b %d %Y - %H:%M')
+date_str = date_time_obj.strftime('%Y-%m-%d')
+
         merchant = row.find('mat-cell', {'class': 'cdk-column-merchant'}).text.strip()
         amount = row.find('mat-cell', {'class': 'cdk-column-amount'}).text.strip()
         
@@ -23,7 +28,7 @@ def extract_data(page_source, csv_writer):
         action = 'Mint' if 'mint' in action_img.get('class', []) else 'Burn'
         
         # Write to CSV (once, including the action)
-        csv_writer.writerow([date_time, merchant, amount, action])
+        csv_writer.writerow([date_str, merchant, amount, action])
 
 # Initialize Selenium and CSV writer
 driver = webdriver.Safari()
@@ -39,7 +44,7 @@ time.sleep(2)
 
 
 # Testing feature: Set this to True to only grab data from the first two pages for testing
-testing_mode = False
+testing_mode = True
 
 # Counter for pages processed
 page_count = 0
