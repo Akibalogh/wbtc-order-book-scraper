@@ -15,7 +15,15 @@ def extract_data(page_source, csv_writer):
         merchant = row.find('mat-cell', {'class': 'cdk-column-merchant'}).text.strip()
         amount = row.find('mat-cell', {'class': 'cdk-column-amount'}).text.strip()
         
+        
+        # Identify whether it's a Mint or Burn based on the class attribute of img tag in 'mat-cell cdk-column-action'
+        action_cell = row.find('mat-cell', {'class': 'cdk-column-action'})
+        action_img = action_cell.find('img')
+        action = 'Mint' if 'mint' in action_img.get('class', []) else 'Burn'
+        
         # Write to CSV
+        csv_writer.writerow([date_time, merchant, amount, action])
+
         csv_writer.writerow([date_time, merchant, amount])
 
 # Initialize Selenium and CSV writer
@@ -25,7 +33,9 @@ wait = WebDriverWait(driver, 10)
 
 csv_file = open('scraped_data.csv', 'w', newline='')
 csv_writer = csv.writer(csv_file)
-csv_writer.writerow(['Date & Time', 'Merchant', 'Amount'])  # Header
+csv_writer.writerow(['Date & Time', 'Merchant', 'Amount'])  
+csv_writer.writerow(['Date & Time', 'Merchant', 'Amount', 'Action'])  # Header
+
 
 # Wait for the first page to load
 time.sleep(2)
