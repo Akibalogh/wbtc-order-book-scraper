@@ -22,10 +22,8 @@ def extract_data(page_source, csv_writer):
         action_img = action_cell.find('img')
         action = 'Mint' if 'mint' in action_img.get('class', []) else 'Burn'
         
-        # Write to CSV
+        # Write to CSV (once, including the action)
         csv_writer.writerow([date_time, merchant, amount, action])
-
-        csv_writer.writerow([date_time, merchant, amount])
 
 # Initialize Selenium and CSV writer
 driver = webdriver.Safari()
@@ -41,7 +39,7 @@ time.sleep(2)
 
 
 # Testing feature: Set this to True to only grab data from the first two pages for testing
-testing_mode = True
+testing_mode = False
 
 # Counter for pages processed
 page_count = 0
