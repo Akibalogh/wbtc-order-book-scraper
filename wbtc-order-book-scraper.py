@@ -40,7 +40,18 @@ csv_writer.writerow(['Date & Time', 'Merchant', 'Amount', 'Action'])  # Header
 # Wait for the first page to load
 time.sleep(2)
 
+
+# Testing feature: Set this to True to only grab data from the first page for testing
+testing_mode = True
+
 while True:
+    # Extract data from the current page
+    page_source = driver.page_source
+    extract_data(page_source, csv_writer)
+    
+    if testing_mode:
+        break  # Exit loop if in testing mode
+
     # Extract data from the current page
     page_source = driver.page_source
     extract_data(page_source, csv_writer)
