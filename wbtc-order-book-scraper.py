@@ -38,8 +38,8 @@ csv_file = open('scraped_data.csv', 'w', newline='')
 csv_writer = csv.writer(csv_file)
 csv_writer.writerow(['Date & Time', 'Merchant', 'Amount', 'Action'])  # Header
 
-# Wait for the first page to load
-time.sleep(2)
+extract_data(driver.page_source, csv_writer)  # Scrape the initial page
+prev_page_source = driver.page_source
 
 # Initialize seen_rows set
 seen_rows = set()
@@ -49,14 +49,12 @@ testing_mode = False
 page_count = 0
 
 while True:
-    # Extract data from the current page
-    page_source = driver.page_source
-    extract_data(page_source, csv_writer)
-    
-    page_count += 1  # Increment the page counter
+    # Scrape data from the current page first
+    extract_data(prev_page_source, csv_writer)
+    page_count += 1
     
     if testing_mode and page_count >= 2:
-        break  # Exit loop if in testing mode and two pages have been processed
+        break
 
     # Go to the next page
     try:
@@ -64,11 +62,16 @@ while True:
         if not next_button.is_enabled():
             break
         next_button.click()
+
+        time.sleep(2)
+        curr_page_source = driver.page_source
+        if curr_page_source == prev_page_source:  # If pages are identical
+            time.sleep(3)  # Add an additional delay
+            curr_page_source = driver.page_source  # Fetch page source again
+
+        prev_page_source = curr_page_source  # Update for the next iteration
     except:
         break
-
-    # Wait for the next page to load
-    time.sleep(2)
 
 # Close the browser and CSV file
 driver.quit()
