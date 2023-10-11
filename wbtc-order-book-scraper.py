@@ -1,4 +1,4 @@
-
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -13,15 +13,13 @@ def extract_data(page_source, csv_writer):
     
     for row in rows:
         # Convert 'Date & Time' to just 'Date' in the 'YYYY-MM-DD' format
-from datetime import datetime
-date_time_str = row.find('mat-cell', {'class': 'cdk-column-timestamp'}).text.strip()
-date_time_obj = datetime.strptime(date_time_str, '%b %d %Y - %H:%M')
-date_str = date_time_obj.strftime('%Y-%m-%d')
+        date_time_str = row.find('mat-cell', {'class': 'cdk-column-timestamp'}).text.strip()
+        date_time_obj = datetime.strptime(date_time_str, '%b %d %Y - %H:%M')
+        date_str = date_time_obj.strftime('%Y-%m-%d')
 
         merchant = row.find('mat-cell', {'class': 'cdk-column-merchant'}).text.strip()
         amount = row.find('mat-cell', {'class': 'cdk-column-amount'}).text.strip()
-        
-        
+
         # Identify whether it's a Mint or Burn based on the class attribute of img tag in 'mat-cell cdk-column-action'
         action_cell = row.find('mat-cell', {'class': 'cdk-column-action'})
         action_img = action_cell.find('img')
@@ -42,9 +40,8 @@ csv_writer.writerow(['Date & Time', 'Merchant', 'Amount', 'Action'])  # Header
 # Wait for the first page to load
 time.sleep(2)
 
-
 # Testing feature: Set this to True to only grab data from the first two pages for testing
-testing_mode = True
+testing_mode = False
 
 # Counter for pages processed
 page_count = 0
@@ -58,10 +55,6 @@ while True:
     
     if testing_mode and page_count >= 2:
         break  # Exit loop if in testing mode and two pages have been processed
-
-    # Extract data from the current page
-    page_source = driver.page_source
-    extract_data(page_source, csv_writer)
 
     # Go to the next page
     try:
