@@ -8,25 +8,26 @@ import csv
 import time
 
 def extract_data(page_source, csv_writer):
+    global seen_rows
     soup = BeautifulSoup(page_source, 'html.parser')
     rows = soup.find_all('mat-row', {'class': 'master-row'})
     
     for row in rows:
-        # Convert 'Date & Time' to just 'Date' in the 'YYYY-MM-DD' format
         date_time_str = row.find('mat-cell', {'class': 'cdk-column-timestamp'}).text.strip()
         date_time_obj = datetime.strptime(date_time_str, '%b %d %Y - %H:%M')
         date_str = date_time_obj.strftime('%Y-%m-%d')
-
         merchant = row.find('mat-cell', {'class': 'cdk-column-merchant'}).text.strip()
         amount = row.find('mat-cell', {'class': 'cdk-column-amount'}).text.strip()
 
-        # Identify whether it's a Mint or Burn based on the class attribute of img tag in 'mat-cell cdk-column-action'
         action_cell = row.find('mat-cell', {'class': 'cdk-column-action'})
         action_img = action_cell.find('img')
         action = 'Mint' if 'mint' in action_img.get('class', []) else 'Burn'
         
-        # Write to CSV (once, including the action)
-        csv_writer.writerow([date_str, merchant, amount, action])
+        # Check for duplicates before writing to CSV
+        row_data = (date_str, merchant, amount)
+        if row_data not in seen_rows:
+            csv_writer.writerow([date_str, merchant, amount, action])
+            seen_rows.add(row_data)
 
 # Initialize Selenium and CSV writer
 driver = webdriver.Safari()
@@ -40,10 +41,11 @@ csv_writer.writerow(['Date & Time', 'Merchant', 'Amount', 'Action'])  # Header
 # Wait for the first page to load
 time.sleep(2)
 
+# Initialize seen_rows set
+seen_rows = set()
+
 # Testing feature: Set this to True to only grab data from the first two pages for testing
 testing_mode = False
-
-# Counter for pages processed
 page_count = 0
 
 while True:
