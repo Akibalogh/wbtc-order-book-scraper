@@ -28,6 +28,10 @@ def extract_data(page_source, csv_writer):
         if row_data not in seen_rows:
             csv_writer.writerow([date_str, merchant, amount, action])
             seen_rows.add(row_data)
+            csv_file.flush()
+
+# Initialize seen_rows set
+seen_rows = set()
 
 # Initialize Selenium and CSV writer
 driver = webdriver.Safari()
@@ -38,11 +42,8 @@ csv_file = open('scraped_data.csv', 'w', newline='')
 csv_writer = csv.writer(csv_file)
 csv_writer.writerow(['Date & Time', 'Merchant', 'Amount', 'Action'])  # Header
 
-extract_data(driver.page_source, csv_writer)  # Scrape the initial page
+# Removed the initial call to extract_data here to prevent premature scraping
 prev_page_source = driver.page_source
-
-# Initialize seen_rows set
-seen_rows = set()
 
 # Testing feature: Set this to True to only grab data from the first two pages for testing
 testing_mode = False
